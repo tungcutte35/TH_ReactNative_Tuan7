@@ -6,17 +6,19 @@ const data = [];
 
 const Todos = ({ navigation, route }) => {
   const [data, setData] = useState([]);
-  const [job, setJob] = useState("");
   const [change, setchange] = useState(0);
   const [editingTodoId, setEditingTodoId] = useState(null);
   const [editingTodoName, setEditingTodoName] = useState("");
+  const handleUpdateTodo = (newTodo) => {
+    setData((data) => [...data, newTodo]);
+  };
   useEffect(() => {
     fetch("https://653f80089e8bd3be29e0b38d.mockapi.io/todo")
       .then((response) => response.json())
       .then((json) => {
         setData(json);
       });
-  }, [change]);
+  }, []);
   const handleEditClick = (itemId, currentName) => {
     setEditingTodoId(itemId);
     setEditingTodoName(currentName);
@@ -50,13 +52,13 @@ const Todos = ({ navigation, route }) => {
         setEditingTodoName("");
       });
   };
-
-  const handleAdd = (job) => {
-    setData([
-      ...data,
-      { id: Math.random(), todoName: job, state: false, editable: false },
-    ]);
-  };
+  useEffect(() => {
+    if (route.params?.newTodo) {
+      const newTodoData = route.params.newTodo;
+      // Thêm dữ liệu todo mới vào danh sách todos hiện tại
+      setData((prevData) => [...prevData, newTodoData]);
+    }
+  }, [route.params?.newTodo]);
 
   return (
     <View style={styles.container}>
@@ -137,7 +139,13 @@ const Todos = ({ navigation, route }) => {
       <Pressable
         style={styles.btn}
         onPress={() =>
-          navigation.navigate("AddToDos", "AddToDos", { handleAdd: handleAdd })
+          navigation.navigate({
+            name: "AddToDos",
+            params: {
+              data: data,
+              handleUpdateTodo: handleUpdateTodo,
+            },
+          })
         }
       >
         <Image

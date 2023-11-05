@@ -3,22 +3,30 @@ import { Pressable, Text } from "react-native";
 import { Image, StyleSheet, View } from "react-native";
 import { TextInput } from "react-native";
 
-const AddToDos = ({ navigation, route, handleAdd }) => {
-  const [job, setJob] = useState("");
-  const handleAdd = () => {
-    setJob(jobInput.current.value);
-
-    // Navigate back to the Todos page
-    navigation.goBack();
-
-    // Pass the job data to the handleAdd prop
-    handleAdd(job);
+const AddToDos = ({ navigation, route }) => {
+  const [newTodo, setNewTodo] = useState("");
+  const handleFinishClick = () => {
+    fetch("https://653f80089e8bd3be29e0b38d.mockapi.io/todo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        todoName: newTodo,
+        id: Math.random(),
+      }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        navigation.navigate(
+          "Todos",
+          route.params.handleUpdateTodo({
+            id: Math.random(),
+            todoName: newTodo,
+          })
+        );
+      });
   };
-  useEffect(() => {
-    setData((prevData) => [...prevData, route.params?.job]);
-
-    setJob(route.params?.job);
-  }, [route.params?.job]);
   return (
     <View style={styles.container}>
       <View style={styles.view1}>
@@ -42,19 +50,19 @@ const AddToDos = ({ navigation, route, handleAdd }) => {
       </View>
       <View style={styles.viewInput}>
         <TextInput
-          value={job}
-          onChangeText={setJob}
+          value={newTodo}
+          onChangeText={(text) => setNewTodo(text)}
           placeholder="Input your job"
           style={styles.input}
         />
         <Image style={styles.img3} source={require("../assets/sk.svg")} />
       </View>
       <View style={styles.view4}>
-        <Pressable style={styles.btn}>
+        <Pressable style={styles.btn} onPress={handleFinishClick}>
           <Text style={styles.text4}>FISNISH</Text>
         </Pressable>
       </View>
-      <View style={styles.img} onPress={handleAdd}>
+      <View style={styles.img}>
         <Image style={styles.img} source={require("../assets/img.png")} />
       </View>
     </View>
